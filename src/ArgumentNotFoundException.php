@@ -2,4 +2,4 @@
 
 namespace CLIHelper;
 
-class ArgumentNotFoundException extends Exception {}
+class ArgumentNotFoundException extends \Exception {}

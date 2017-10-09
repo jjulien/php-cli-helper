@@ -2,8 +2,6 @@
 
 namespace CLIHelper;
 
-use ArgumentNotFoundException;
-
 class Helper {
 
     /**
