@@ -2,7 +2,7 @@
     "name": "jjulien/php-cli-helper",
     "description": "Helper for creating CLI based PHP programs",
     "type": "library",
-    "license": "Apache v2",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "John Julien",
