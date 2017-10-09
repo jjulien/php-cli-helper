@@ -1,0 +1,21 @@
+{
+    "name": "jjulien/php-cli-helper",
+    "description": "Helper for creating CLI based PHP programs",
+    "type": "library",
+    "license": "Apache v2",
+    "authors": [
+        {
+            "name": "John Julien",
+            "email": "john@julienfamily.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "CLIHelper\\": "src"
+        }
+    }
+}
