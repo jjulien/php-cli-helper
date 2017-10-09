@@ -36,13 +36,13 @@ class Argument {
      * The type of argument
      * @var string
      */
-    protected $type;
+    protected $type = Argument::TYPE_VALUE;
 
     /**
      * Is this argument required
      * @var booelan
      */
-    protected $required;
+    protected $required = false;
 
     /**
      * Help message for this argument
