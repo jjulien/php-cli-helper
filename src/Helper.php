@@ -2,7 +2,6 @@
 
 namespace CLIHelper;
 
-
 class Helper {
 
     /**
@@ -54,6 +53,34 @@ class Helper {
      */
     public function getOptions() {
         return $this->options;
+    }
+
+    public function getValue($name) {
+        if (!array_key_exists($name, $this->getArgs())) {
+            throw new ArgumentNotFoundException();
+        }
+
+        // Get argument
+        $arg = $this->getArgs()[$name];
+        // Check for boolean arguments
+        if ($arg->getType() == Argument::TYPE_BOOLEAN) {
+               if ( array_key_exists($arg->getShortArg(), $this->getOptions()) ||
+                    array_key_exists($arg->getLongArg(), $this->getOptions()) ) {
+                   return true;
+               } else {
+                   return false;
+               }
+        }
+
+        // Check for value arguments
+        if ($arg->getType() == Argument::TYPE_VALUE) {
+            if (array_key_exists($arg->getShortArg(), $this->getOptions())) {
+                return $this->getOptions()[$arg->getShortArg()];
+            }
+            if (array_key_exists($arg->getLongArg(), $this->getOptions())) {
+                return $this->getOptions()[$arg->getLongArg()];
+            }
+        }
     }
 
     /**
