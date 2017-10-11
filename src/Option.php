@@ -175,8 +175,26 @@ class Option {
         return ($this->getShortOpt() && $this->getLongOpt());
     }
 
+    /**
+     * Returns the value that should be displayed on the help summary line of the usage clause
+     * Required options are wrapped in < > and optional in [ ].  Mutually exclusive options are
+     * separated with a |.  Options that require a value also contain the word VALUE after them.
+     *
+     * Examples:
+     *   <-r VALUE| --required VALUE>
+     *   [-o | --optional]
+     *   [--not-mutually-exclusive VALUE]
+     *   [-n]
+     *
+     * @return string
+     */
     public function getHelpSummaryLine() {
-        $summary = "";
+        if ($this->getType() == self::TYPE_VALUE) {
+            $valueString = " VALUE";
+        } else {
+            $valueString = "";
+        }
+
         if ($this->isRequired()) {
             $openGroup = "<";
             $closeGroup = ">";
@@ -186,13 +204,13 @@ class Option {
         }
         $summary = $openGroup;
         if ($this->isDual()) {
-            $summary .= "-" . $this->getShortOpt() . " | --" . $this->getLongOpt();
+            $summary .= "-" . $this->getShortOpt() . $valueString . " | --" . $this->getLongOpt() . $valueString;
         } else {
             if ($this->getShortOpt()) {
-                $summary .= "-" . $this->getShortOpt();
+                $summary .= "-" . $this->getShortOpt() . $valueString;
             }
             else {
-                $summary .= "--" . $this->getLongOpt();
+                $summary .= "--" . $this->getLongOpt() . $valueString;
             }
         }
         $summary .= $closeGroup;

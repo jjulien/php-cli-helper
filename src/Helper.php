@@ -138,12 +138,20 @@ class Helper {
         fwrite(STDOUT, "\n");
     }
 
+    /**
+     * Display the extended help message for an option.  This takes into account the
+     * length of the message and implements word wrapping.  While wrapping, it attempts to be smart
+     * enough to keep deliberate spacing and new line characters that may be desired by
+     * the user.
+     *
+     * Basic logic is if the message contains a \n then it should be honored.  When wrapping
+     * a line, if there are 2 or less trailing whitespaces, they are discarded, if there are
+     * more than 2 white spaces they will be wrapped and displayed on the following line
+     *
+     * @param $help
+     * @param $padlength
+     */
     private function displayHelpMessageForOption($help, $padlength) {
-        // IF string contains \n, then stop it there
-        // If any new or end of line contains two or less white spaces, then clear it
-        // If it contains more than two, leave all white space, this may be user desired
-        // formatting.
-
         $helpLength = strlen($help);
         $helpCharsDisplayed = 0;
 
@@ -192,13 +200,21 @@ class Helper {
         }
     }
 
+    /**
+     * Returns a string for the option summary line which is the first line of the help output.
+     * Required options are displayed first, followed by optional ones.  Required options are
+     * wrapped in < > and optional in [ ].  Mutually exclusive options are separated with a |.
+     *
+     * Options that require a value also contain the word VALUE after them.
+     *
+     * Example:
+     * Usage: script_name <-r VALUE| --required VALUE> [-o | --optional] [--not-mutually-exclusive VALUE] [-n]
+     * @return string
+     */
     private function getHelpOptionSummary() {
         $requiredString = "";
         $optionalString = "";
 
-        // Required will be < -f | --file > for long and short or just --file or -f for either long or short
-        // Optional will be [-f|--file] or just [-f] or [--file]
-        // We will group all required options first
         foreach ($this->getOptions() as $opt) {
             if ($opt->isRequired()) {
                 if ($requiredString) { $requiredString .= " "; }
@@ -212,14 +228,12 @@ class Helper {
     }
 
     /**
-     * Returns the help string for this program and all arguments
+     * Returns the value for an option.  Returns a boolean or a string
      *
-     * @return string
+     * @param $name
+     * @return mixed
+     * @throws OptionNotFoundException
      */
-    public function getHelp() {
-
-    }
-
     public function getValue($name) {
         if (!array_key_exists($name, $this->getOptions())) {
             throw new OptionNotFoundException();
