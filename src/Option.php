@@ -2,56 +2,56 @@
 
 namespace CLIHelper;
 
-class Argument {
+class Option {
 
     /**
-     * Argument acts as an on/off boolean switch
+     * Option acts as an on/off boolean switch
      */
     const TYPE_BOOLEAN = 'boolean';
 
     /**
-     * Argument requires a value to be provided
+     * Option requires a value to be provided
      */
     const TYPE_VALUE   = 'value';
 
     /**
-     * The short/single character name for this argument
+     * The short/single character name for this option
      * @var string
      */
-    protected $shortArg;
+    protected $shortOpt;
 
     /**
-     * The long name for the argument
+     * The long name for the option
      * @var string
      */
-    protected $longArg;
+    protected $longOpt;
 
     /**
-     * The name describing this argument
+     * The name describing this option
      * @var string
      */
     protected $name;
 
     /**
-     * The type of argument
+     * The type of option
      * @var string
      */
-    protected $type = Argument::TYPE_VALUE;
+    protected $type = Option::TYPE_VALUE;
 
     /**
-     * Is this argument required
-     * @var booelan
+     * Is this option required
+     * @var boolean
      */
     protected $required = false;
 
     /**
-     * Help message for this argument
+     * Help message for this option
      * @var string
      */
     protected $help;
 
     /**
-     * The default value for this argument
+     * The default value for this option
      * @var mixed
      */
     protected $default;
@@ -59,33 +59,33 @@ class Argument {
     /**
      * @return string
      */
-    public function getShortArg()
+    public function getShortOpt()
     {
-        return $this->shortArg;
+        return $this->shortOpt;
     }
 
     /**
-     * @param string $shortArg
+     * @param string $shortOpt
      */
-    public function setShortArg($shortArg)
+    public function setShortOpt($shortOpt)
     {
-        $this->shortArg = $shortArg;
+        $this->shortOpt = $shortOpt;
     }
 
     /**
      * @return string
      */
-    public function getLongArg()
+    public function getLongOpt()
     {
-        return $this->longArg;
+        return $this->longOpt;
     }
 
     /**
-     * @param string $longArg
+     * @param string $longOpt
      */
-    public function setLongArg($longArg)
+    public function setLongOpt($longOpt)
     {
-        $this->longArg = $longArg;
+        $this->longOpt = $longOpt;
     }
 
     /**
@@ -107,7 +107,7 @@ class Argument {
     /**
      * @return booelan
      */
-    public function getRequired()
+    public function isRequired()
     {
         return $this->required;
     }
@@ -168,5 +168,34 @@ class Argument {
         $this->name = $name;
     }
 
+    /**
+     * @return boolean
+     */
+    public function isDual() {
+        return ($this->getShortOpt() && $this->getLongOpt());
+    }
 
+    public function getHelpSummaryLine() {
+        $summary = "";
+        if ($this->isRequired()) {
+            $openGroup = "<";
+            $closeGroup = ">";
+        } else {
+            $openGroup = "[";
+            $closeGroup = "]";
+        }
+        $summary = $openGroup;
+        if ($this->isDual()) {
+            $summary .= "-" . $this->getShortOpt() . " | --" . $this->getLongOpt();
+        } else {
+            if ($this->getShortOpt()) {
+                $summary .= "-" . $this->getShortOpt();
+            }
+            else {
+                $summary .= "--" . $this->getLongOpt();
+            }
+        }
+        $summary .= $closeGroup;
+        return $summary;
+    }
 }
