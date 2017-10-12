@@ -128,12 +128,6 @@ class Helper {
             }
             fwrite(STDOUT, sprintf("%" . $length . "s : ", $optionString));
             $this->displayHelpMessageForOption($help, $length + 3);
-            //$helpLength = strlen($help);
-            //$helpCharsDisplayed = 0;
-            //while ($helpCharsDisplayed < $helpLength) {
-            //    fwrite(STDOUT, sprintf("%s\n", substr($help, $helpCharsDisplayed, $this->maxHelpChars)));
-            //    $helpCharsDisplayed += $this->maxHelpChars;
-           // }
         }
         fwrite(STDOUT, "\n");
     }
