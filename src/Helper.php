@@ -2,8 +2,6 @@
 
 namespace CLIHelper;
 
-use function Composer\Autoload\includeFile;
-
 class Helper {
 
     /**
@@ -59,6 +57,7 @@ class Helper {
      * @param Option $opt
      */
     public function addOption(Option $opt) {
+        // Option must have a name, and at least a short or long arg
         $this->options[$opt->getName()] = $opt;
     }
 
@@ -390,4 +389,13 @@ class Helper {
         }
         return getopt($shortOpts, $longOpts);
     }
+
+    /**
+     * @param $name
+     * @return OptionBuilder
+     */
+    public function newOption() {
+        return new OptionBuilder($this);
+    }
+
 }

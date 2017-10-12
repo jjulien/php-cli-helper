@@ -66,10 +66,13 @@ class Option {
 
     /**
      * @param string $shortOpt
+     *
+     * @return $this
      */
     public function setShortOpt($shortOpt)
     {
         $this->shortOpt = $shortOpt;
+        return $this;
     }
 
     /**
@@ -161,19 +164,18 @@ class Option {
     }
 
     /**
+     * @param string $name
+     */
+    public function setName($name) {
+        $this->name = $name;
+    }
+
+    /**
      * @return mixed
      */
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * @param mixed $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
     }
 
     /**
@@ -238,4 +240,6 @@ class Option {
     public function getLongOptDisplay() {
         return "-" . $this->getLongOpt();
     }
+
+
 }
