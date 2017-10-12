@@ -2,6 +2,8 @@
 
 namespace CLIHelper;
 
+use function Composer\Autoload\includeFile;
+
 class Helper {
 
     /**
@@ -23,6 +25,13 @@ class Helper {
      * @var array
      */
     protected $parsedOptions;
+
+    /**
+     * Stores a list of errors encountered after parsing the command line options
+     *
+     * @var array
+     */
+    protected $parsedOptionErrors;
 
     /**
      * The name of the script being executed with this helper
@@ -112,10 +121,12 @@ class Helper {
     }
 
     /**
-     * Displays the help string to STDOUT for this program and all options
+     * Displays the help string to file handle (default: STDOUT) for this program and all options
+     *
+     * @param $handle
      */
-    public function printHelp() {
-        fwrite(STDOUT, "\nUsage: " . $this->getScriptName() . " " . $this->getHelpOptionSummary() . "\n");
+    public function printHelp($handle=STDOUT) {
+        fwrite($handle, "\nUsage: " . $this->getScriptName() . " " . $this->getHelpOptionSummary() . "\n");
         foreach ($this->getOptions() as $opt) {
             if ($opt->getHelp()) { $help = $opt->getHelp(); }
             else { $help = "No help available"; }
@@ -126,10 +137,10 @@ class Helper {
                 if ($opt->getShortOpt()) { $optionString = "-" . $opt->getShortOpt(); }
                 else { $optionString = "--" . $opt->getLongOpt(); }
             }
-            fwrite(STDOUT, sprintf("%" . $length . "s : ", $optionString));
-            $this->displayHelpMessageForOption($help, $length + 3);
+            fwrite($handle, sprintf("%" . $length . "s : ", $optionString));
+            $this->displayHelpMessageForOption($handle, $help, $length + 3);
         }
-        fwrite(STDOUT, "\n");
+        fwrite($handle, "\n");
     }
 
     /**
@@ -145,7 +156,7 @@ class Helper {
      * @param $help
      * @param $padlength
      */
-    private function displayHelpMessageForOption($help, $padlength) {
+    private function displayHelpMessageForOption($handle=STDOUT, $help, $padlength) {
         $helpLength = strlen($help);
         $helpCharsDisplayed = 0;
 
@@ -189,7 +200,7 @@ class Helper {
             if ($lines > 0 ) {
                 $displayString = str_pad($displayString, strlen($displayString) + $padlength, " ",STR_PAD_LEFT);
             }
-            fwrite(STDOUT, sprintf("%s\n", $displayString));
+            fwrite($handle, sprintf("%s\n", $displayString));
             $lines++;
         }
     }
@@ -267,7 +278,92 @@ class Helper {
             $this->printHelp();
             exit(0);
         }
+
+        $this->validateParsedOptions();
+        if (count($this->parsedOptionErrors) > 0) {
+            $this->displayParsedErrorOptions();
+            $this->printHelp(STDERR);
+            exit(1);
+        }
     }
+
+    /**
+     * Print errors encountered during option parsing to STDERR
+     */
+    public function displayParsedErrorOptions() {
+        fwrite(STDERR, "\n");
+        foreach ($this->parsedOptionErrors as $error) {
+            fwrite(STDERR, $error . "\n");
+        }
+    }
+
+    /**
+     * Validate the options provided match all of the rules specified for each option.
+     *
+     * - Mutually exclusive options, such as options that have both a short and long form
+     *   cannot be used together, such as -f or --file
+     * - Options that require a value must have a value provided
+     * - Required options must be provided
+     */
+    public function validateParsedOptions() {
+        $this->parsedOptionErrors = array();
+        foreach ($this->getOptions() as $opt) {
+            // Validate mutually exclusive options
+            try {
+                $usedOption = $this->getUsedOption($opt);
+            } catch (MutuallyExclusiveOptionException $e) {
+                $this->parsedOptionErrors[] = "Options " . $opt->getShortOptDisplay() . " and " . $opt->getLongOptDisplay() . " are mutually exclusive.  You cannot use them both.";
+                continue;
+            }
+
+            if ($usedOption && $opt->getType() == Option::TYPE_VALUE && !$this->getValue($opt->getName())) {
+                // Validate "Value" options have values
+                $this->parsedOptionErrors[] = "Option " . $usedOption . " requires a value to be provided";
+            } elseif ($opt->isRequired() && !$this->getValue($opt->getName())) {
+                // Validate required options
+                if ($opt->isDual()) {
+                    $optionDisplay = $opt->getShortOptDisplay() . " or " . $opt->getLongOptDisplay();
+                } else {
+                    if ($opt->getShortOpt()) {
+                        $optionDisplay = $opt->getShortOptDisplay();
+                    } else {
+                        $optionDisplay = $opt->getLongOptDisplay();
+                    }
+                }
+                $this->parsedOptionErrors[] = "Option " . $optionDisplay . " is required";
+            }
+        }
+    }
+
+    /**
+     * Returns the short or long option that was used on the command line, if it was used
+     *
+     * @param Option $opt
+     * @return string
+     * @throws MutuallyExclusiveOptionException
+     */
+    public function getUsedOption(Option $opt) {
+        // If an option requires a value, and it is the last option on the command line, getopts
+        // assumes there is no value and doesn't include it in the parsed option list at all.
+        // We don't want to throw it away like this, and rather let the user know they have used
+        // an option, but that option requires a value.  This is why we are also checking
+        // $_SERVER['argv'] here
+        $short = ( array_key_exists($opt->getShortOpt(), $this->getParsedOptions()) ||
+                   in_array($opt->getShortOptDisplay(), $_SERVER['argv']));
+        $long = ( array_key_exists($opt->getLongOpt(), $this->getParsedOptions()) ||
+                  in_array($opt->getLongOptDisplay(), $_SERVER['argv']));
+
+        if ($opt->isDual() && $short && $long ) {
+            throw new MutuallyExclusiveOptionException();
+        } elseif ($short) {
+            return $opt->getShortOptDisplay();
+        } elseif ($long) {
+            return $opt->getLongOptDisplay();
+        } else {
+            return false;
+        }
+    }
+
 
     /**
      * Parses the array of Option objects, generates getopt parameters and returns the associative array from getopt

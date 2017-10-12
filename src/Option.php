@@ -224,4 +224,18 @@ class Option {
         $summary .= $closeGroup;
         return $summary;
     }
+
+    /**
+     * @return string
+     */
+    public function getShortOptDisplay() {
+        return "-" . $this->getShortOpt();
+    }
+
+    /**
+     * @return string
+     */
+    public function getLongOptDisplay() {
+        return "-" . $this->getLongOpt();
+    }
 }
