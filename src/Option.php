@@ -98,9 +98,13 @@ class Option {
 
     /**
      * @param string $type
+     * @throws InvalidOptionException
      */
     public function setType($type)
     {
+        if ($type == self::TYPE_BOOLEAN && $this->required) {
+            throw new InvalidOptionException("An option cannot be both required and of type BOOLEAN");
+        }
         $this->type = $type;
     }
 
@@ -113,10 +117,14 @@ class Option {
     }
 
     /**
-     * @param booelan $required
+     * @param $required
+     * @throws InvalidOptionException
      */
     public function setRequired($required)
     {
+        if ($required && $this->type == self::TYPE_BOOLEAN) {
+            throw new InvalidOptionException("An option cannot be both required and of type BOOLEAN");
+        }
         $this->required = $required;
     }
 
@@ -215,5 +223,19 @@ class Option {
         }
         $summary .= $closeGroup;
         return $summary;
+    }
+
+    /**
+     * @return string
+     */
+    public function getShortOptDisplay() {
+        return "-" . $this->getShortOpt();
+    }
+
+    /**
+     * @return string
+     */
+    public function getLongOptDisplay() {
+        return "-" . $this->getLongOpt();
     }
 }
