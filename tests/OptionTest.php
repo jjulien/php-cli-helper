@@ -63,7 +63,6 @@ class OptionTest extends \PHPUnit_Framework_TestCase {
     public function testGetLongOptDisplay_hasDoubleDashPrefix() {
         $option = new Option();
         $option->setLongOpt("long");
-        print $option->getLongOptDisplay() . "\n";
         self::assertRegExp("/^--[^-]/", $option->getLongOptDisplay());
     }
 
@@ -79,6 +78,22 @@ class OptionTest extends \PHPUnit_Framework_TestCase {
     public function testSetShortOpt_throwsExceptionIfMoreThanOneDashProvided() {
         $option = new Option();
         $option->setShortOpt("--s");
+    }
+
+    /**
+     * @expectedException \CLIHelper\InvalidOptionException
+     */
+    public function testSetShortOpt_throwsExceptionIfOnlyDashProvidedAsOption() {
+        $option = new Option();
+        $option->setShortOpt("-");
+    }
+
+    /**
+     * @expectedException \CLIHelper\InvalidOptionException
+     */
+    public function testSetShortOpt_throwsExceptionIfEmptyStringProvidedAsOption() {
+        $option = new Option();
+        $option->setShortOpt("");
     }
 
     public function testSetLongOpt_stripsLeadingDoubleDashIfProvided() {
@@ -117,6 +132,12 @@ class OptionTest extends \PHPUnit_Framework_TestCase {
     public function testSetLongOpt_throwsExceptionIfOnlyOneCharacterProvided() {
         $option = new Option();
         $option->setLongOpt("s");
+    }
+
+    public function testsetLongOpt_allowsDashesInOption() {
+        $option = new Option();
+        $option->setLongOpt("--long-with-dashes");
+        self::assertEquals("long-with-dashes", $option->getLongOpt());
     }
 
 }
