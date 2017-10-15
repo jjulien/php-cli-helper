@@ -238,7 +238,7 @@ class Option {
      * @return string
      */
     public function getLongOptDisplay() {
-        return "-" . $this->getLongOpt();
+        return "--" . $this->getLongOpt();
     }
 
 
