@@ -57,6 +57,12 @@ class Option {
     protected $default;
 
     /**
+     * Errors identified with the option when isComplete is called
+     * @var string[]
+     */
+    protected $optionErrors;
+
+    /**
      * @return string
      */
     public function getShortOpt()
@@ -259,5 +265,31 @@ class Option {
         return "--" . $this->getLongOpt();
     }
 
+    /**
+     * @return \string[]
+     */
+    public function getOptionErrors() {
+        return $this->optionErrors;
+    }
 
+
+    /**
+     * Tests if an option is complete, aka. has enough information to be useable.  Options
+     * must have a name, type and at least a short or long opt
+     *
+     * @return boolean
+     */
+    public function isComplete() {
+        $this->optionErrors = array();
+        if (!$this->getName()) {
+            $this->optionErrors[] = "Options must have a name";
+        }
+        if (!$this->getShortOpt() && !$this->getLongOpt()) {
+            $this->optionErrors[] = "Options must have at least a short or long option specified";
+        }
+        if (!$this->getType()) {
+            $this->optionErrors[] = "Options must have a type set";
+        }
+        return (count($this->getOptionErrors()) == 0);
+    }
 }

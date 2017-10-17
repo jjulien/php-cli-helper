@@ -58,6 +58,9 @@ class Helper {
      */
     public function addOption(Option $opt) {
         // Option must have a name, and at least a short or long arg
+        if (!$opt->isComplete()) {
+            throw new InvalidOptionException(implode("; ", $opt->getOptionErrors()));
+        }
         $this->options[$opt->getName()] = $opt;
     }
 
