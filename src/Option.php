@@ -16,53 +16,63 @@ class Option {
 
     /**
      * The short/single character name for this option
+     *
      * @var string
      */
     protected $shortOpt;
 
     /**
      * The long name for the option
+     *
      * @var string
      */
     protected $longOpt;
 
     /**
      * The name describing this option
+     *
      * @var string
      */
     protected $name;
 
     /**
      * The type of option
+     *
      * @var string
      */
     protected $type = Option::TYPE_VALUE;
 
     /**
      * Is this option required
+     *
      * @var boolean
      */
     protected $required = false;
 
     /**
      * Help message for this option
+     *
      * @var string
      */
     protected $help;
 
     /**
      * The default value for this option
+     *
      * @var mixed
      */
     protected $default;
 
     /**
      * Errors identified with the option when isComplete is called
+     *
      * @var string[]
      */
     protected $optionErrors;
 
     /**
+     * Returns the short option string
+     *
      * @return string
      */
     public function getShortOpt()
@@ -71,6 +81,9 @@ class Option {
     }
 
     /**
+     * Set a single character to be used as the short option.  You can provide either a single character
+     * such as "s" or you can optionally provide a leading dash such as "-s"
+     *
      * @param string $shortOpt
      * @return $this
      * @throws InvalidOptionException
@@ -91,6 +104,8 @@ class Option {
     }
 
     /**
+     * Returns the long option string
+     *
      * @return string
      */
     public function getLongOpt()
@@ -99,6 +114,10 @@ class Option {
     }
 
     /**
+     * Sets the long option name for this option.  Long option names must be 2 or more characters.
+     * When calling this method you can either provide just the long option name, such as "file-in"
+     * or you can optionally prefix it with two leading dashes, such as "--file-in"
+     *
      * @param string $longOpt
      * @throws InvalidOptionException
      */
@@ -116,6 +135,8 @@ class Option {
     }
 
     /**
+     * Returns the type of this option.  Options can be of type BOOLEAN or VALUE.
+     *
      * @return string
      */
     public function getType()
@@ -124,6 +145,12 @@ class Option {
     }
 
     /**
+     * Sets the type of the option.  Options can be of type BOOLEAN or VALUE.  BOOLEAN options
+     * are options that are either on or off, such as the common "verbose" option.  It takes no
+     * value, it's either on or off.  VALUE options read a value in that comes on the command
+     * line right after the option.  An example would be "--file-in filename" where "--file-in"
+     * must have a value provided along with it.
+     *
      * @param string $type
      * @throws InvalidOptionException
      */
@@ -136,6 +163,8 @@ class Option {
     }
 
     /**
+     * Returns true if this option is required
+     *
      * @return booelan
      */
     public function isRequired()
@@ -144,6 +173,11 @@ class Option {
     }
 
     /**
+     * Indicate that this option is required and must be provided by the user.  Required
+     * options must take a value in and cannot be boolean options, as a required boolean
+     * option would always be the same as saying this option must always be on.  There would
+     * be no way for the user to customize how a required boolean option behaves.
+     *
      * @param $required
      * @throws InvalidOptionException
      */
@@ -156,6 +190,9 @@ class Option {
     }
 
     /**
+     * Gets the help message to be displayed to the user for this option if help is selected
+     * or if an option validation fails
+     *
      * @return string
      */
     public function getHelp()
@@ -164,6 +201,9 @@ class Option {
     }
 
     /**
+     * Sets the help message to be displayed to the user for this option if help is selected
+     * or if an option validation fails
+     *
      * @param string $help
      */
     public function setHelp($help)
@@ -172,6 +212,9 @@ class Option {
     }
 
     /**
+     * Returns the default value for this option.  This value would be used if the option was not
+     * provided on the command line
+     *
      * @return mixed
      */
     public function getDefault()
@@ -180,6 +223,9 @@ class Option {
     }
 
     /**
+     * Set the default value to be used for this option if it is not provided by the
+     * user on the command line.
+     *
      * @param mixed $default
      */
     public function setDefault($default)
@@ -188,6 +234,11 @@ class Option {
     }
 
     /**
+     * Set the name of this option.  The option name is used to retrieve information about
+     * the option, such as if it was used by the user and what value they provided.  Because
+     * options can have both a short and long option, the name is the way the option is uniquely
+     * identified in your program.
+     *
      * @param string $name
      */
     public function setName($name) {
@@ -195,6 +246,8 @@ class Option {
     }
 
     /**
+     * Returns the name of the option
+     *
      * @return mixed
      */
     public function getName()
@@ -203,6 +256,8 @@ class Option {
     }
 
     /**
+     * Returns true if this option has both a short and long option
+     *
      * @return boolean
      */
     public function isDual() {
@@ -252,6 +307,8 @@ class Option {
     }
 
     /**
+     * Returns the option string prefixed with a single dash.  This is
+     * how the user would invoke this option on the command line.
      * @return string
      */
     public function getShortOptDisplay() {
@@ -259,6 +316,9 @@ class Option {
     }
 
     /**
+     * Returns the option string prefixed with a double dash.  This is
+     * how the user would invoke this option on the command line.
+     *
      * @return string
      */
     public function getLongOptDisplay() {
@@ -266,6 +326,10 @@ class Option {
     }
 
     /**
+     * Returns the errors with this option.  These errors would indicate a programming
+     * error, not a user error.  Such as forgetting to give an option a name.  It is used
+     * by the helper to validate new options that are being added
+     *
      * @return \string[]
      */
     public function getOptionErrors() {
