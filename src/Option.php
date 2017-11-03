@@ -57,6 +57,12 @@ class Option {
     protected $default;
 
     /**
+     * Errors identified with the option when isComplete is called
+     * @var string[]
+     */
+    protected $optionErrors;
+
+    /**
      * @return string
      */
     public function getShortOpt()
@@ -66,12 +72,21 @@ class Option {
 
     /**
      * @param string $shortOpt
-     *
      * @return $this
+     * @throws InvalidOptionException
      */
     public function setShortOpt($shortOpt)
     {
-        $this->shortOpt = $shortOpt;
+        $opt = preg_replace("/^-/", "", $shortOpt);
+        if (preg_match("/^-/", $opt)) {
+            throw new InvalidOptionException("Short options cannot have more than one leading dashes");
+        } elseif (strlen($opt) > 1) {
+            throw new InvalidOptionException("Short options can only be a single characters");
+            // If the length of $opt is 0 then that means either a blank string or single dash were passed in
+        } elseif (strlen($opt) == 0 || ! preg_match("/^[a-zA-Z]/", $opt)) {
+            throw new InvalidOptionException("Short options must be a single alpha character");
+        }
+        $this->shortOpt = $opt;
         return $this;
     }
 
@@ -85,10 +100,19 @@ class Option {
 
     /**
      * @param string $longOpt
+     * @throws InvalidOptionException
      */
     public function setLongOpt($longOpt)
     {
-        $this->longOpt = $longOpt;
+        $opt = preg_replace("/^--/", "", $longOpt);
+        if (preg_match("/^-/", $opt)) {
+            throw new InvalidOptionException("Long options must have exactly two leading dashes");
+        } elseif (strlen($opt) < 2) {
+            throw new InvalidOptionException("long options must be at least 2 characters long");
+        } elseif (!preg_match("/^[a-zA-Z]+-*.*/", $opt) ) {
+            throw new InvalidOptionException("long options must be made of alpha characters or dashes, and have to begin with exactly 2 dashes");
+        }
+        $this->longOpt = $opt;
     }
 
     /**
@@ -238,8 +262,34 @@ class Option {
      * @return string
      */
     public function getLongOptDisplay() {
-        return "-" . $this->getLongOpt();
+        return "--" . $this->getLongOpt();
+    }
+
+    /**
+     * @return \string[]
+     */
+    public function getOptionErrors() {
+        return $this->optionErrors;
     }
 
 
+    /**
+     * Tests if an option is complete, aka. has enough information to be useable.  Options
+     * must have a name, type and at least a short or long opt
+     *
+     * @return boolean
+     */
+    public function isComplete() {
+        $this->optionErrors = array();
+        if (!$this->getName()) {
+            $this->optionErrors[] = "Options must have a name";
+        }
+        if (!$this->getShortOpt() && !$this->getLongOpt()) {
+            $this->optionErrors[] = "Options must have at least a short or long option specified";
+        }
+        if (!$this->getType()) {
+            $this->optionErrors[] = "Options must have a type set";
+        }
+        return (count($this->getOptionErrors()) == 0);
+    }
 }

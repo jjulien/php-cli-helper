@@ -42,8 +42,7 @@ class Helper {
      * Helper constructor.
      */
     public function __construct() {
-        global $argv;
-        $this->scriptName = basename(realpath($argv[0]));
+        $this->scriptName = basename($_SERVER['argv'][0]);
         $helpOption = new Option();
         $helpOption->setName("help");
         $helpOption->setType(Option::TYPE_BOOLEAN);
@@ -58,6 +57,9 @@ class Helper {
      */
     public function addOption(Option $opt) {
         // Option must have a name, and at least a short or long arg
+        if (!$opt->isComplete()) {
+            throw new InvalidOptionException(implode("; ", $opt->getOptionErrors()));
+        }
         $this->options[$opt->getName()] = $opt;
     }
 
@@ -102,7 +104,7 @@ class Helper {
     /**
      * @return int
      */
-    private function getLongestOptionLength() {
+    public function getLongestOptionLength() {
         $length = 0;
         foreach ($this->getOptions() as $opt) {
             if ($opt->isDual()) {
@@ -125,7 +127,17 @@ class Helper {
      * @param $handle
      */
     public function printHelp($handle=STDOUT) {
-        fwrite($handle, "\nUsage: " . $this->getScriptName() . " " . $this->getHelpOptionSummary() . "\n");
+        fwrite($handle, $this->getHelp());
+    }
+
+    /**
+     * Returns the help string
+     *
+     * @return string
+     */
+    public function getHelp() {
+        $helpMessage = "";
+        $helpMessage .= "\nUsage: " . $this->getScriptName() . " " . $this->getHelpOptionSummary() . "\n";
         foreach ($this->getOptions() as $opt) {
             if ($opt->getHelp()) { $help = $opt->getHelp(); }
             else { $help = "No help available"; }
@@ -136,14 +148,15 @@ class Helper {
                 if ($opt->getShortOpt()) { $optionString = "-" . $opt->getShortOpt(); }
                 else { $optionString = "--" . $opt->getLongOpt(); }
             }
-            fwrite($handle, sprintf("%" . $length . "s : ", $optionString));
-            $this->displayHelpMessageForOption($handle, $help, $length + 3);
+            $helpMessage .= sprintf("%" . $length . "s : ", $optionString);
+            $helpMessage .= $this->getDisplayHelpMessageForOption($help, $length + 3);
         }
-        fwrite($handle, "\n");
+        $helpMessage .= "\n";
+        return $helpMessage;
     }
 
     /**
-     * Display the extended help message for an option.  This takes into account the
+     * Get the extended help message for an option.  This takes into account the
      * length of the message and implements word wrapping.  While wrapping, it attempts to be smart
      * enough to keep deliberate spacing and new line characters that may be desired by
      * the user.
@@ -154,8 +167,10 @@ class Helper {
      *
      * @param $help
      * @param $padlength
+     * @return string
      */
-    private function displayHelpMessageForOption($handle=STDOUT, $help, $padlength) {
+    private function getDisplayHelpMessageForOption($help, $padlength) {
+        $extendedHelp = "";
         $helpLength = strlen($help);
         $helpCharsDisplayed = 0;
 
@@ -199,9 +214,10 @@ class Helper {
             if ($lines > 0 ) {
                 $displayString = str_pad($displayString, strlen($displayString) + $padlength, " ",STR_PAD_LEFT);
             }
-            fwrite($handle, sprintf("%s\n", $displayString));
+            $extendedHelp .= sprintf("%s\n", $displayString);
             $lines++;
         }
+        return $extendedHelp;
     }
 
     /**
@@ -275,15 +291,23 @@ class Helper {
         $this->parsedOptions = $this->getOptParse();
         if ($this->getValue("help")) {
             $this->printHelp();
-            exit(0);
+            $this->end(0);
         }
 
-        $this->validateParsedOptions();
-        if (count($this->parsedOptionErrors) > 0) {
+        if (! $this->validateParsedOptions()) {
             $this->displayParsedErrorOptions();
             $this->printHelp(STDERR);
-            exit(1);
+            $this->end(1);
         }
+    }
+
+    /**
+     * Helper method that is used so testing can mock and avoid program termination
+     *
+     * @param $code
+     */
+    public function end($code) {
+        exit($code);
     }
 
     /**
@@ -303,6 +327,8 @@ class Helper {
      *   cannot be used together, such as -f or --file
      * - Options that require a value must have a value provided
      * - Required options must be provided
+     *
+     * @return boolean
      */
     public function validateParsedOptions() {
         $this->parsedOptionErrors = array();
@@ -332,6 +358,7 @@ class Helper {
                 $this->parsedOptionErrors[] = "Option " . $optionDisplay . " is required";
             }
         }
+        return (count($this->parsedOptionErrors) == 0);
     }
 
     /**
@@ -369,7 +396,7 @@ class Helper {
      *
      * @return array
      */
-    protected function getOptParse() {
+    public function getOptParse() {
         $shortOpts = "";
         $longOpts = array();
         foreach ($this->getOptions() as $key => $arg ) {
@@ -391,8 +418,16 @@ class Helper {
     }
 
     /**
-     * @param $name
+     * @return array
+     */
+    public function getParsedOptionErrors() {
+        return $this->parsedOptionErrors;
+    }
+
+
+    /**
      * @return OptionBuilder
+     * @internal param $name
      */
     public function newOption() {
         return new OptionBuilder($this);
