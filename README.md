@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jjulien/php-cli-helper.png)](https://travis-ci.org/jjulien/php-cli-helper)
+
 # PHP CLI Helper
 PHP CLI Helper was created to make developing PHP command line tools easy.  It currently supports command line option parsing and validation.
 
