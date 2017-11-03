@@ -5,7 +5,7 @@ PHP CLI Helper was created to make developing PHP command line tools easy.  It c
 The main class is the `CLIHelper\Helper`.  You will tell this class all of the options you want to support and how you want that option to behave.  After you tell the helper to parse the options, it will validate that the user has not violated any of the rules you defined for how your options should behave.  If violations are found, the user receives a help message showing them how the option are suppose to work and which option rule they violated.  If no violations are found, you then user the helper object to retrieve values for options and determine which options the user specified.
 
 ## Usage Example
-Code for `sample-script.php`
+**Code**
 ```
 #!/usr/bin/php
 <?php
@@ -40,7 +40,7 @@ $helper->newOption()
 $helper->parse();
 ```
 
-Invocation of `sample-script.php`
+**Invocation**
 ```
 $./sample-script.php
 
