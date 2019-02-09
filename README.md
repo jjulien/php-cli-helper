@@ -40,6 +40,11 @@ $helper->newOption()
     ->build();
 
 $helper->parse();
+
+# Reading options
+if ($helper->getValue('verbose')) {
+    print 'Reading in file "' . $helper->getValue('file-in') . '" and saving output to "' . $helper->getValue('file-out') . '"' . "\n";
+}
 ```
 
 **Invocation**
